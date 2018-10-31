@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=gb2312"/>
+	<title></title>
+	<meta name="generator" content="LibreOffice 6.0.6.2 (Windows)"/>
+	<meta name="author" content="root"/>
+	<meta name="created" content="2018-08-23T12:27:00"/>
+	<meta name="changedby" content="root"/>
+	<meta name="changed" content="2018-08-23T14:43:00"/>
+	<meta name="AppVersion" content="15.0000"/>
+	<meta name="DocSecurity" content="0"/>
+	<meta name="HyperlinksChanged" content="false"/>
+	<meta name="LinksUpToDate" content="false"/>
+	<meta name="ScaleCrop" content="false"/>
+	<meta name="ShareDoc" content="false"/>
+	<style type="text/css">
+		@page { margin-left: 3.18cm; margin-right: 3.18cm; margin-top: 2.54cm; margin-bottom: 2.54cm }
+		p { margin-bottom: 0.25cm; direction: ltr; line-height: 115%; text-align: justify; orphans: 0; widows: 0 }
+	</style>
+</head>
+<body lang="zh-CN" dir="ltr">
+<p style="margin-bottom: 0cm; line-height: 100%"><font face="Calibri, serif"><span lang="en-US">Hadoop
+client </span></font>代码阅读</p>
+<p style="margin-bottom: 0cm; line-height: 100%"><br/>
+
+</p>
+<p style="margin-bottom: 0cm; line-height: 100%"><font face="Calibri, serif"><span lang="en-US">Day01:</span></font></p>
+<p style="margin-bottom: 0cm; line-height: 100%"><font face="Calibri, serif"><span lang="en-US">IdentityHashMap</span></font>：</p>
+<p style="margin-bottom: 0cm; line-height: 100%"><font face="Calibri, serif"><span lang="en-US">IdentityHashMap</span></font>有其特殊用途，比如序列化或者深度复制。或者记录对象代理。
+</p>
+<p style="margin-bottom: 0cm; line-height: 100%">举个例子，<font face="Calibri, serif"><span lang="en-US">jvm</span></font>中的所有对象都是独一无二的，哪怕两个对象是同一个<font face="Calibri, serif"><span lang="en-US">class</span></font>的对象
+</p>
+<p style="margin-bottom: 0cm; line-height: 100%">，而且两个对象的数据完全相同，对于<font face="Calibri, serif"><span lang="en-US">jvm</span></font>来说，他们也是完全不同的，
+</p>
+<p style="margin-bottom: 0cm; line-height: 100%">如果要用一个<font face="Calibri, serif"><span lang="en-US">map</span></font>来记录这样<font face="Calibri, serif"><span lang="en-US">jvm</span></font>中的对象，你就需要用<font face="Calibri, serif"><span lang="en-US">IdentityHashMap</span></font>，而不能使用其他<font face="Calibri, serif"><span lang="en-US">Map</span></font>实现</p>
+<p style="margin-bottom: 0cm; line-height: 100%"><br/>
+
+</p>
+<p align="left" style="margin-bottom: 0cm; line-height: 100%; orphans: 2; widows: 2; background: #faf7ef">
+<font face="Calibri, serif"><span lang="en-US"><font color="#993300"><font face="Verdana, serif"><font size="3" style="font-size: 12pt"><b>1.</b></font></font></span></font><font face="宋体"><font size="3" style="font-size: 12pt"><b>什么是</b></font></font><font face="Calibri, serif"><span lang="en-US"><font face="Verdana, serif"><font size="3" style="font-size: 12pt"><b>java</b></font></font></span></font><font face="宋体"><font size="3" style="font-size: 12pt"><b>的</b></font></font><font face="Calibri, serif"><span lang="en-US"><font face="Verdana, serif"><font size="3" style="font-size: 12pt"><b>spi</b></font></font></font></span></font></p>
+<p align="left" style="margin-bottom: 0cm; line-height: 100%; orphans: 2; widows: 2; background: #faf7ef">
+<font face="Calibri, serif"><span lang="en-US"><font color="#000000"><font face="Verdana, serif">SPI
+</font></span></font><font face="宋体">全称为 </font><font face="Calibri, serif"><span lang="en-US"><font face="Verdana, serif">(Service
+Provider Interface) ,</font></span></font><font face="宋体">是</font><font face="Calibri, serif"><span lang="en-US"><font face="Verdana, serif">JDK</font></span></font><font face="宋体">内置的一种服务提供发现机制。
+目前有不少框架用它来做服务的扩展发现， 简单来说，它就是一种动态替换发现的机制，
+举个例子来说， 有个接口，想运行时动态的给它添加实现，你只需要添加一个实现。</font></font></p>
+<p align="left" style="margin-bottom: 0cm; line-height: 100%; orphans: 2; widows: 2; background: #faf7ef">
+<font color="#000000"><font face="宋体">具体是在</font><font face="Calibri, serif"><span lang="en-US"><font face="Verdana, serif">JAR</font></span></font><font face="宋体">包的</font><font face="Calibri, serif"><span lang="en-US"><font face="Verdana, serif">&quot;src/META-INF/services/&quot;</font></span></font><font face="宋体">目录下建立一个文件，文件名是接口的全限定名，文件的内容可以有多行，每行都是该接口对应的具体实现类的全限定名</font><font face="Calibri, serif"><span lang="en-US"><font face="Verdana, serif">.</font></font></span></font></p>
+<p align="left" style="margin-top: 0.26cm; margin-bottom: 0.26cm; line-height: 100%; orphans: 2; widows: 2; background: #faf7ef">
+<font color="#393939">&nbsp;</font></p>
+<p align="left" style="margin-bottom: 0cm; line-height: 100%; orphans: 2; widows: 2; background: #faf7ef">
+<font face="Calibri, serif"><span lang="en-US"><font color="#993300"><font face="Verdana, serif"><font size="3" style="font-size: 12pt"><b>2.</b></font></font></span></font><font face="宋体"><font size="3" style="font-size: 12pt"><b>运用场景</b></font></font></font></p>
+<p align="left" style="margin-bottom: 0cm; line-height: 100%; orphans: 2; widows: 2; background: #faf7ef">
+<font color="#000000"><font face="宋体">比如你想扩展一些框架，如</font><font face="Calibri, serif"><span lang="en-US"><font face="Verdana, serif">spring</font></span></font><font face="宋体">的一些功能，就是要实现它接口，然后自己配置了。</font></font></p>
+<p style="margin-bottom: 0cm; line-height: 100%"><br/>
+
+</p>
+<p style="margin-bottom: 0cm; line-height: 100%">一般使用接口的实现类都是静态<font face="Calibri, serif"><span lang="en-US">new</span></font>一个实现类赋值给接口引用，如下：</p>
+<p style="margin-bottom: 0cm; line-height: 100%"><br/>
+
+</p>
+<p style="margin-bottom: 0cm; line-height: 100%"><font face="Calibri, serif"><span lang="en-US">HelloService
+service = new HelloImpl();</span></font></p>
+<p style="margin-bottom: 0cm; line-height: 100%"><br/>
+
+</p>
+<p style="margin-bottom: 0cm; line-height: 100%">如果需要动态的获取一个接口的实现类呢？全局扫描全部的<font face="Calibri, serif"><span lang="en-US">Class</span></font>，然后判断是否实现了某个接口？代价太大，一般不会这么做。一种合适的方式就是使用配置文件，把实现类名配置在某个地方，然后读取这个配置文件，获取实现类名。<font face="Calibri, serif"><span lang="en-US">JDK</span></font>给我们提供的<font face="Calibri, serif"><span lang="en-US">TestServiceLoader
+</span></font>就是这种方式。</p>
+<p style="margin-bottom: 0cm; line-height: 100%"><br/>
+
+</p>
+<p style="margin-bottom: 0cm; line-height: 100%">总结<font face="Calibri, serif"><span lang="en-US">:</span></font></p>
+<ol>
+	<li/>
+<p style="margin-bottom: 0cm; line-height: 100%">文件系统有大约<font face="Calibri, serif"><span lang="en-US">9</span></font>个实现，<font face="Calibri, serif"><span lang="en-US">hdfs</span></font>只是其中之一</p>
+	<li/>
+<p style="margin-bottom: 0cm; line-height: 100%">文件系统对象获取的时候是通过反射获取，获取前先检查缓存中是否存在</p>
+	<li/>
+<p style="margin-bottom: 0cm; line-height: 100%">关闭客户端时，文件系统会被关闭调</p>
+	<li/>
+<p style="margin-bottom: 0cm; line-height: 100%">文件系统的统计信息
+	如读写次数 放在<font face="Calibri, serif"><span lang="en-US">map
+	IdentityHashMap</span></font>中</p>
+	<li/>
+<p style="margin-bottom: 0cm; line-height: 100%"><font face="Calibri, serif"><span lang="en-US">DistuributeFilesystem</span></font>内置的<font face="Calibri, serif"><span lang="en-US">Dfs</span></font>，是用来跟集群沟通的桥梁。</p>
+</ol>
+<p style="margin-left: 0.64cm; margin-bottom: 0cm; line-height: 100%">
+今日<font face="Calibri, serif"><span lang="en-US">debug</span></font>至
+<font face="Calibri, serif"><span lang="en-US">DistuributeFilesystem</span></font>的<font face="Calibri, serif"><span lang="en-US">create</span></font>方法</p>
+</body>
+</html>
